@@ -611,6 +611,13 @@ class ExecutionTraceAnalyzer(OnTheFlyAnalysis):
 
                         elif indv_generator.interface[_function_hash][parameter_index] == "string":
                             argument = _d["chromosome"][transaction_index]["arguments"][parameter_index + 1]
+                        elif indv_generator.interface[_function_hash][parameter_index].startswith("uint"):
+                            argument = model[variable].as_long()
+                            bits = 256
+                            if indv_generator.interface[_function_hash][parameter_index] != "uint":
+                                bits = int(indv_generator.interface[_function_hash][parameter_index].replace("uint", ""))
+                            base = 1 << bits
+                            argument %= base
                         else:
                             argument = model[variable].as_long()
                             self.env.solver.add(BitVec(str(variable), 256) != BitVecVal(0, 256))
