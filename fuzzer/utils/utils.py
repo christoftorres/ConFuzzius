@@ -61,41 +61,45 @@ def code_type(value, type):
 
 def run_command(cmd):
     FNULL = open(os.devnull, 'w')
-    solc_p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=FNULL)
-    return solc_p.communicate()[0]
+    p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=FNULL)
+    return p.communicate()[0]
 
 def compile(solc_version, evm_version, source_code_file):
     out = None
+    source_code = ""
     with open(source_code_file, 'r') as file:
         source_code = file.read()
-        try:
-            if solc_version != solcx.get_solc_version():
-                solcx.set_solc_version(solc_version, True)
-            out = solcx.compile_standard({
-                'language': 'Solidity',
-                'sources': {source_code_file: {'content': source_code}},
-                'settings': {
-                    "optimizer": {
-                        "enabled": True,
-                        "runs": 200
-                    },
-                    "evmVersion": evm_version,
-                    "outputSelection": {
-                        source_code_file: {
-                            "*":
-                                [
-                                    "abi",
-                                    "evm.deployedBytecode",
-                                    "evm.bytecode.object",
-                                    "evm.legacyAssembly",
-                                ],
-                        }
+    try:
+        if not str(solc_version).startswith("v"):
+            solc_version = "v"+str(solc_version.truncate())
+        if not solc_version in solcx.get_installed_solc_versions():
+            solcx.install_solc(solc_version)
+        solcx.set_solc_version(solc_version, True)
+        out = solcx.compile_standard({
+            'language': 'Solidity',
+            'sources': {source_code_file: {'content': source_code}},
+            'settings': {
+                "optimizer": {
+                    "enabled": True,
+                    "runs": 200
+                },
+                "evmVersion": evm_version,
+                "outputSelection": {
+                    source_code_file: {
+                        "*":
+                            [
+                                "abi",
+                                "evm.deployedBytecode",
+                                "evm.bytecode.object",
+                                "evm.legacyAssembly",
+                            ],
                     }
                 }
-            }, allow_paths='.')
-        except Exception as e:
-            print("Error: Solidity compilation failed!")
-            print(e.message)
+            }
+        }, allow_paths='.')
+    except Exception as e:
+        print("Error: Solidity compilation failed!")
+        print(e.message)
     return out
 
 def get_interface_from_abi(abi):
