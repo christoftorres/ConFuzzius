@@ -82,17 +82,18 @@ class InstrumentedEVM:
         return self.vm.state._account_db
 
     def set_vm(self, block_identifier='latest'):
-        if not self.w3:
+        _block = None
+        if self.w3:
+            if block_identifier == 'latest':
+                block_identifier = self.w3.eth.blockNumber
+            validate_uint256(block_identifier)
+            _block = self.w3.eth.getBlock(block_identifier)
+        if not _block:
             if block_identifier in [HOMESTEAD_MAINNET_BLOCK, BYZANTIUM_MAINNET_BLOCK,PETERSBURG_MAINNET_BLOCK]:
                 _block = self.get_cached_block_by_id(block_identifier)
             else:
                 self.logger.error("Unknown block identifier.")
                 sys.exit(-4)
-        else:
-            if block_identifier == 'latest':
-                block_identifier = self.w3.eth.blockNumber
-            validate_uint256(block_identifier)
-            _block = self.w3.eth.getBlock(block_identifier)
         block_header = BlockHeader(difficulty=_block.difficulty,
                                    block_number=_block.number,
                                    gas_limit=_block.gasLimit,
