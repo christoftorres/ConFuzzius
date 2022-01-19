@@ -129,7 +129,7 @@ class DetectorExecutor:
             self.logger.title(color+"-----------------------------------------------------")
             print_individual_solution_as_transaction(self.logger, individual.solution, color, self.function_signature_mapping)
 
-        pc, type = self.integer_overflow_detector.detect_integer_overflow(mfe, tainted_record, previous_instruction, current_instruction, individual, transaction_index)
+        pc, type = self.integer_overflow_detector.detect_integer_overflow(previous_instruction, current_instruction, tainted_record)
         if pc and DetectorExecutor.add_error(errors, pc, "Integer Overflow", individual, mfe, self.integer_overflow_detector, self.source_map):
             color = DetectorExecutor.get_color_for_severity(self.integer_overflow_detector.severity)
             if type == "overflow":
