@@ -71,15 +71,9 @@ pip install -r requirements.txt
   / /___/ /_/ / / / / __/ / /_/ / / /_/ /_/ / /_/ (__  ) 
   \____/\____/_/ /_/_/    \__,_/ /___/___/_/\__,_/____/  
 
-usage: main.py [-h] (-s SOURCE | -a ABI) [-c CONTRACT] [-b BLOCKCHAIN_STATE]
-               [--solc SOLC_VERSION] [--evm EVM_VERSION]
-               [-g GENERATIONS | -t GLOBAL_TIMEOUT] [-n POPULATION_SIZE]
-               [-pc PROBABILITY_CROSSOVER] [-pm PROBABILITY_MUTATION]
-               [-r RESULTS] [--seed SEED] [--cfg] [--rpc-host RPC_HOST]
-               [--rpc-port RPC_PORT] [--data-dependency DATA_DEPENDENCY]
-               [--constraint-solving CONSTRAINT_SOLVING]
-               [--environmental-instrumentation ENVIRONMENTAL_INSTRUMENTATION]
-               [-v]
+usage: main.py [-h] (-s SOURCE | -a ABI) [-c CONTRACT] [-b BLOCKCHAIN_STATE] [--solc SOLC_VERSION] [--evm EVM_VERSION] [-g GENERATIONS | -t GLOBAL_TIMEOUT] [-n POPULATION_SIZE] [-pc PROBABILITY_CROSSOVER] [-pm PROBABILITY_MUTATION]
+               [-r RESULTS] [--seed SEED] [--cfg] [--rpc-host RPC_HOST] [--rpc-port RPC_PORT] [--data-dependency DATA_DEPENDENCY] [--constraint-solving CONSTRAINT_SOLVING] [--environmental-instrumentation ENVIRONMENTAL_INSTRUMENTATION]
+               [--max-individual-length MAX_INDIVIDUAL_LENGTH] [--max-symbolic-execution MAX_SYMBOLIC_EXECUTION] [-v]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -87,18 +81,11 @@ optional arguments:
                         Solidity smart contract source code file (.sol).
   -a ABI, --abi ABI     Smart contract ABI file (.json).
   -c CONTRACT, --contract CONTRACT
-                        Contract name to be fuzzed (if Solidity source code
-                        file provided) or blockchain contract address (if ABI
-                        file provided).
+                        Contract name to be fuzzed (if Solidity source code file provided) or blockchain contract address (if ABI file provided).
   -b BLOCKCHAIN_STATE, --blockchain-state BLOCKCHAIN_STATE
-                        Initialize fuzzer with a blockchain state by providing
-                        a JSON file (if Solidity source code file provided) or
-                        a block number (if ABI file provided).
-  --solc SOLC_VERSION   Solidity compiler version (default
-                        '0.7.6+commit.7338295f.Linux.gpp'). Installed compiler
-                        versions: ['v0.4.26', 'v0.7.6'].
-  --evm EVM_VERSION     Ethereum VM (default 'petersburg'). Available VM's:
-                        'homestead', 'byzantium' or 'petersburg'.
+                        Initialize fuzzer with a blockchain state by providing a JSON file (if Solidity source code file provided) or a block number (if ABI file provided).
+  --solc SOLC_VERSION   Solidity compiler version (default '0.6.12'). Installed compiler versions: [Version('0.6.12'), Version('0.4.26'), Version('0.4.25')].
+  --evm EVM_VERSION     Ethereum VM (default 'petersburg'). Available VM's: 'homestead', 'byzantium' or 'petersburg'.
   -g GENERATIONS, --generations GENERATIONS
                         Number of generations (default 10).
   -t GLOBAL_TIMEOUT, --timeout GLOBAL_TIMEOUT
@@ -111,20 +98,20 @@ optional arguments:
                         Size of the population.
   -r RESULTS, --results RESULTS
                         Folder or JSON file where results should be stored.
-  --seed SEED           Initialize the random number generator with a given
-                        seed.
+  --seed SEED           Initialize the random number generator with a given seed.
   --cfg                 Build control-flow graph and highlight code coverage.
   --rpc-host RPC_HOST   Ethereum client RPC hostname.
   --rpc-port RPC_PORT   Ethereum client RPC port.
   --data-dependency DATA_DEPENDENCY
-                        Disable/Enable data dependency analysis: 0 - Disable,
-                        1 - Enable (default: 1)
+                        Disable/Enable data dependency analysis: 0 - Disable, 1 - Enable (default: 1)
   --constraint-solving CONSTRAINT_SOLVING
-                        Disable/Enable constraint solving: 0 - Disable, 1 -
-                        Enable (default: 1)
+                        Disable/Enable constraint solving: 0 - Disable, 1 - Enable (default: 1)
   --environmental-instrumentation ENVIRONMENTAL_INSTRUMENTATION
-                        Disable/Enable environmental instrumentation: 0 -
-                        Disable, 1 - Enable (default: 1)
+                        Disable/Enable environmental instrumentation: 0 - Disable, 1 - Enable (default: 1)
+  --max-individual-length MAX_INDIVIDUAL_LENGTH
+                        Maximal length of an individual (default: 5)
+  --max-symbolic-execution MAX_SYMBOLIC_EXECUTION
+                        Maximum number of symbolic execution calls before restting population (default: 10)
   -v, --version         show program's version number and exit
 ```
 
