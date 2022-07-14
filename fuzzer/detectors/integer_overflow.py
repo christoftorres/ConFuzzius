@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from z3.z3util import get_vars
-from utils.utils import convert_stack_value_to_int
+from z3 import BitVec
+from utils.utils import convert_stack_value_to_int, convert_stack_value_to_hex
 
 class IntegerOverflowDetector():
     def __init__(self):
@@ -13,9 +13,13 @@ class IntegerOverflowDetector():
         self.severity = "High"
         self.overflows = {}
         self.underflows = {}
+        self.compiler_value_negation = False
 
-    def detect_integer_overflow(self, previous_instruction, current_instruction, tainted_record):
-        if previous_instruction and previous_instruction["op"] == "ADD":
+    def detect_integer_overflow(self, mfe, tainted_record, previous_instruction, current_instruction, individual, transaction_index):
+        if previous_instruction and previous_instruction["op"] == "NOT" and current_instruction and current_instruction["op"] == "ADD":
+            self.compiler_value_negation = True
+        # Addition
+        elif previous_instruction and previous_instruction["op"] == "ADD":
             a = convert_stack_value_to_int(previous_instruction["stack"][-2])
             b = convert_stack_value_to_int(previous_instruction["stack"][-1])
             if a + b != convert_stack_value_to_int(current_instruction["stack"][-1]) and not self.compiler_value_negation:
@@ -40,10 +44,9 @@ class IntegerOverflowDetector():
                         self.overflows[index] = previous_instruction["pc"], transaction_index
         # Subtraction
         elif previous_instruction and previous_instruction["op"] == "SUB":
-            a = convert_stack_value_to_int(previous_instruction["stack"][-2])
-            b = convert_stack_value_to_int(previous_instruction["stack"][-1])
-            c = convert_stack_value_to_int(current_instruction["stack"][-1])
-            if a - b != c:
+            a = convert_stack_value_to_int(previous_instruction["stack"][-1])
+            b = convert_stack_value_to_int(previous_instruction["stack"][-2])
+            if a - b != convert_stack_value_to_int(current_instruction["stack"][-1]):
                 if tainted_record and tainted_record.stack and tainted_record.stack[-1]:
                     index = ''.join(str(taint) for taint in tainted_record.stack[-1])
                     self.underflows[index] = previous_instruction["pc"], transaction_index
