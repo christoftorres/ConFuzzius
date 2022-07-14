@@ -13,10 +13,10 @@ class BlockDependencyDetector():
         self.block_instruction = None
         self.block_dependency = False
 
-    def detect_block_dependency(self, tainted_record, current_instruction, previous_branch):
+    def detect_block_dependency(self, tainted_record, current_instruction, previous_branch, transaction_index):
         # Check for a call with transfer of ether (check if amount is greater than zero or symbolic)
         if current_instruction["op"] == "CALL" and (convert_stack_value_to_int(current_instruction["stack"][-3]) or tainted_record and tainted_record.stack[-3]) or \
-           current_instruction["op"] in ["SELFDESTRUCT", "SUICIDE", "CREATE", "DELEGATECALL"]:
+           current_instruction["op"] in ["STATICCALL", "SELFDESTRUCT", "SUICIDE", "CREATE", "DELEGATECALL"]:
             # Check if there is a block dependency by analyzing previous branch expression
             for expression in previous_branch:
                 if "blockhash" in str(expression) or \
@@ -49,8 +49,8 @@ class BlockDependencyDetector():
                            self.block_dependency = True
         # Register block related information
         elif current_instruction["op"] in ["BLOCKHASH", "COINBASE", "TIMESTAMP", "NUMBER", "DIFFICULTY", "GASLIMIT"]:
-            self.block_instruction = current_instruction["pc"]
+            self.block_instruction = current_instruction["pc"], transaction_index
         # Check if execution stops withour exception
         if self.block_dependency and current_instruction["op"] in ["STOP", "SELFDESTRUCT", "RETURN"]:
             return self.block_instruction
-        return None
+        return None, None

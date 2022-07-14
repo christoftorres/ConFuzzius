@@ -37,5 +37,5 @@ class LeakingEtherDetector():
                                 if argument in settings.ATTACKER_ACCOUNTS and individual.solution[i]["transaction"]["from"] not in settings.ATTACKER_ACCOUNTS:
                                     address_passed_as_argument = True
                         if not address_passed_as_argument:
-                            self.leaks[transaction_index] = current_instruction["pc"]
-        return None
+                            self.leaks[transaction_index] = current_instruction["pc"], transaction_index
+        return None, None

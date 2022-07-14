@@ -1,5 +1,5 @@
 web3==4.8.3
 py-evm==0.3.0a1
-py-solc-x==0.5.0
+py-solc-x==1.1.1
 z3-solver==4.8.5.0
 psutil==5.7.2

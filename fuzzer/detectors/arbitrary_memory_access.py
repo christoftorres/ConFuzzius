@@ -12,7 +12,7 @@ class ArbitraryMemoryAccessDetector():
         self.swc_id = 124
         self.severity = "High"
 
-    def detect_arbitrary_memory_access(self, tainted_record, individual, current_instruction):
+    def detect_arbitrary_memory_access(self, tainted_record, individual, current_instruction, transaction_index):
         if current_instruction["op"] == "SSTORE":
             if tainted_record and tainted_record.stack:
                 tainted_index = tainted_record.stack[-1]
@@ -26,5 +26,5 @@ class ArbitraryMemoryAccessDetector():
                                 transaction_index = int(str(tainted_index_var).split("_")[1])
                                 argument_index = int(str(tainted_index_var).split("_")[2]) + 1
                                 if type(individual.chromosome[transaction_index]["arguments"][argument_index]) is int and individual.chromosome[transaction_index]["arguments"][argument_index] > 2**128-1:
-                                    return current_instruction["pc"]
-        return None
+                                    return current_instruction["pc"], transaction_index
+        return None, None

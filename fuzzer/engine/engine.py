@@ -95,7 +95,7 @@ class EvolutionaryFuzzingEngine(object):
                                      StatVar('ori_fmin'),
                                      StatVar('ori_fmean'))
 
-    def __init__(self, population, selection, crossover, mutation, fitness=None, analysis=None):
+    def __init__(self, population, selection, crossover, mutation, fitness=None, analysis=None, mapping=None):
         # Set logger.
         logger_name = 'engine.{}'.format(self.__class__.__name__)
         self.logger = logging.getLogger(logger_name)
@@ -107,6 +107,7 @@ class EvolutionaryFuzzingEngine(object):
         self.crossover = crossover
         self.mutation = mutation
         self.analysis = [] if analysis is None else [a() for a in analysis]
+        self.mapping = mapping
 
         # Maxima and minima in population.
         self._fmax, self._fmin, self._fmean = None, None, None
@@ -149,6 +150,17 @@ class EvolutionaryFuzzingEngine(object):
                 # NOTE: One series of genetic operation generates 2 new individuals.
                 size = self.population.size // 2
 
+                """for i in range(self.population.size):
+                    individual = self.population.individuals[i].decode()
+                    output = str(len(individual))
+                    for input in individual:
+                        tx = input["transaction"]
+                        if tx["data"][:10] in self.mapping:
+                            output += " " + self.mapping[tx["data"][:10]].split("(")[0] + "(" + tx["data"][11:] + ")"
+                        else:
+                            output += " " + tx["data"]
+                    print(output)"""
+
                 # Fill the new population.
                 for _ in range(size):
                     # Select father and mother.
@@ -178,7 +190,7 @@ class EvolutionaryFuzzingEngine(object):
             # Perform the analysis post processing.
             for a in self.analysis:
                 a.finalize(population=self.population, engine=self)
-            
+
     def _update_statvars(self):
         '''
         Private helper function to update statistic variables in GA engine, like
