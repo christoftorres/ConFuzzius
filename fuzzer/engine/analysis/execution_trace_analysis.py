@@ -35,10 +35,10 @@ class ExecutionTraceAnalyzer(OnTheFlyAnalysis):
         self.env.memoized_symbolic_execution.clear()
         self.env.individual_branches.clear()
 
-        from utils.utils import get_function_signature_mapping
+        """from utils.utils import get_function_signature_mapping
         m = get_function_signature_mapping(self.env.abi)
 
-        """for i in population:
+        for i in population:
             a = [c["arguments"] for c in i.chromosome]
             b = []
             for j in a:
@@ -330,14 +330,17 @@ class ExecutionTraceAnalyzer(OnTheFlyAnalysis):
                     taint = BitVec("_".join(["balance", str(transaction_index)]), 256)
                     env.symbolic_taint_analyzer.introduce_taint(taint, instruction)
 
-                elif instruction["op"] == "CALL":
+                elif instruction["op"] in ["CALL", "STATICCALL"]:
                     _address_as_hex = to_hex(force_bytes_to_address(int_to_big_endian(convert_stack_value_to_int(result.trace[i]["stack"][-2]))))
                     if i + 1 < len(result.trace):
                         _result_as_hex = convert_stack_value_to_hex(result.trace[i + 1]["stack"][-1])
                     else:
                         _result_as_hex = ""
                     previous_call_address = _address_as_hex
-                    taint = BitVec("_".join(["call", str(transaction_index), str(_address_as_hex), str(_result_as_hex), str(instruction["pc"])]), 256)
+                    call_type = "call"
+                    if instruction["op"] == "STATICCALL":
+                        call_type = "staticcall"
+                    taint = BitVec("_".join([call_type, str(transaction_index), str(_address_as_hex), str(_result_as_hex), str(instruction["pc"])]), 256)
                     env.symbolic_taint_analyzer.introduce_taint(taint, instruction)
 
                 elif instruction["op"] == "CALLER":
@@ -455,9 +458,6 @@ class ExecutionTraceAnalyzer(OnTheFlyAnalysis):
         env.symbolic_taint_analyzer.clear_storage()
         env.instrumented_evm.restore_from_snapshot()
 
-        #print(indv.generator.arguments_pool)
-        #print(indv.generator.amounts_pool)
-
     def get_coverage_with_children(self, children_code_coverage, code_coverage):
         code_coverage = len(code_coverage)
 
@@ -530,11 +530,11 @@ class ExecutionTraceAnalyzer(OnTheFlyAnalysis):
                                                                self.env.instrumented_evm.vm.state.block_number)
                         indv_generator.add_blocknumber_to_pool(_function_hash, blocknumber)
 
-                    elif str(variable).startswith("call_"):
+                    elif str(variable).startswith("call_") or str(variable).startswith("staticcall_"):
                         address = to_normalized_address(var_split[2])
                         old_result = int(var_split[3], 16)
                         _function_hash = _d["chromosome"][transaction_index]["arguments"][0]
-                        new_result = int(model[variable].as_long())
+                        new_result = 1 - old_result
                         indv_generator.add_callresult_to_pool(_function_hash, address, old_result)
                         indv_generator.add_callresult_to_pool(_function_hash, address, new_result)
 

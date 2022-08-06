@@ -155,7 +155,7 @@ class Fuzzer:
             mutation = Mutation(pm=settings.PROBABILITY_MUTATION)
 
         # Create and run our evolutionary fuzzing engine
-        engine = EvolutionaryFuzzingEngine(population=population, selection=selection, crossover=crossover, mutation=mutation)
+        engine = EvolutionaryFuzzingEngine(population=population, selection=selection, crossover=crossover, mutation=mutation, mapping=get_function_signature_mapping(self.env.abi))
         engine.fitness_register(lambda x: fitness_function(x, self.env))
         engine.analysis.append(ExecutionTraceAnalyzer(self.env))
 
@@ -181,9 +181,8 @@ def main():
     # Check if contract has already been analyzed
     if args.results and os.path.exists(args.results):
         os.remove(args.results)
-        print("delteed file")
-    #    logger.info("Contract "+str(args.source)+" has already been analyzed: "+str(args.results))
-    #    sys.exit(0)
+        logger.info("Contract "+str(args.source)+" has already been analyzed: "+str(args.results))
+        sys.exit(0)
 
     # Initializing random
     if args.seed:
@@ -299,8 +298,14 @@ def launch_argument_parser():
     parser.add_argument("--environmental-instrumentation",
                         help="Disable/Enable environmental instrumentation: 0 - Disable, 1 - Enable (default: 1)", action="store",
                         dest="environmental_instrumentation", type=int)
+    parser.add_argument("--max-individual-length",
+                        help="Maximal length of an individual (default: " + str(settings.MAX_INDIVIDUAL_LENGTH) + ")", action="store",
+                        dest="max_individual_length", type=int)
+    parser.add_argument("--max-symbolic-execution",
+                        help="Maximum number of symbolic execution calls before restting population (default: " + str(settings.MAX_SYMBOLIC_EXECUTION) + ")", action="store",
+                        dest="max_symbolic_execution", type=int)
 
-    version = "ConFuzzius - Version 0.0.1 - "
+    version = "ConFuzzius - Version 0.0.2 - "
     version += "\"By three methods we may learn wisdom:\n"
     version += "First, by reflection, which is noblest;\n"
     version += "Second, by imitation, which is easiest;\n"
@@ -348,6 +353,11 @@ def launch_argument_parser():
         settings.ENVIRONMENTAL_INSTRUMENTATION = True
     elif args.environmental_instrumentation == 0:
         settings.ENVIRONMENTAL_INSTRUMENTATION = False
+
+    if args.max_individual_length:
+        settings.MAX_INDIVIDUAL_LENGTH = args.max_individual_length
+    if args.max_symbolic_execution:
+        settings.MAX_SYMBOLIC_EXECUTION = args.max_symbolic_execution
 
     if args.abi:
         settings.REMOTE_FUZZING = True

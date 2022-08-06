@@ -14,5 +14,5 @@ class LockingEtherDetector():
         if not cfg.can_send_ether:
             # Check if we can receive ether
             if current_instruction["op"] == "STOP" and individual.solution[transaction_index]["transaction"]["value"] > 0:
-                return current_instruction["pc"]
-        return None
+                return current_instruction["pc"], transaction_index
+        return None, None

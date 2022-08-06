@@ -268,6 +268,27 @@ def fuzz_call_opcode_fn(computation, opcode_fn) -> None:
             memory_output_start_position,
             memory_output_size,
         ) = computation.stack_pop_ints(5)
+        computation.memory_write(memory_output_start_position, memory_output_size, b'\x00' * memory_output_size if random.randint(1, 2) == 1 else b'\xff' * memory_output_size)
+        computation.stack_push_int(computation.state.fuzzed_call_return[_to])
+    else:
+        computation.stack_push_bytes(to)
+        computation.stack_push_int(gas)
+        opcode_fn(computation=computation)
+    return _to
+
+def fuzz_staticcall_opcode_fn(computation, opcode_fn) -> None:
+    gas = computation.stack_pop1_int()
+    to = computation.stack_pop1_bytes()
+    _to = to_normalized_address(to_hex(force_bytes_to_address(to)))
+    if settings.ENVIRONMENTAL_INSTRUMENTATION and hasattr(computation.state, "fuzzed_call_return") and computation.state.fuzzed_call_return is not None\
+            and _to in computation.state.fuzzed_call_return and computation.state.fuzzed_call_return[_to] is not None:
+        (
+            memory_input_start_position,
+            memory_input_size,
+            memory_output_start_position,
+            memory_output_size,
+        ) = computation.stack_pop_ints(4)
+        computation.memory_write(memory_output_start_position, memory_output_size, b'\x00' * memory_output_size if random.randint(1, 2) == 1 else b'\xff' * memory_output_size)
         computation.stack_push_int(computation.state.fuzzed_call_return[_to])
     else:
         computation.stack_push_bytes(to)
@@ -340,6 +361,8 @@ def fuzz_apply_computation(cls, state, message, transaction_context):
                     fuzz_balance_opcode_fn(computation=computation, opcode_fn=opcode_fn)
                 elif opcode == 0xf1: # CALL
                     previous_call_address = fuzz_call_opcode_fn(computation=computation, opcode_fn=opcode_fn)
+                elif opcode == 0xfa: # STATICCALL
+                    previous_call_address = fuzz_staticcall_opcode_fn(computation=computation, opcode_fn=opcode_fn)
                 elif opcode == 0x3b: # EXTCODESIZE
                     fuzz_extcodesize_opcode_fn(computation=computation, opcode_fn=opcode_fn)
                 elif opcode == 0x3d: # RETURNDATASIZE

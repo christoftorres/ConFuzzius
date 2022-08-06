@@ -312,13 +312,15 @@ class Generator:
     def get_random_callresult_and_address(self, function):
         if function in self.callresult_pool:
             address = random.choice(list(self.callresult_pool[function].keys()))
-            return address, self.callresult_pool[function][address].head_and_rotate()
+            value = self.callresult_pool[function][address].head_and_rotate()
+            return address, value
         return None, None
 
     def get_random_callresult(self, function, address):
         if function in self.callresult_pool:
             if address in self.callresult_pool[function]:
-                return self.callresult_pool[function][address].head_and_rotate()
+                value = self.callresult_pool[function][address].head_and_rotate()
+                return value
         return None
 
     def remove_callresult_from_pool(self, function, address, result):

@@ -149,7 +149,10 @@ def get_function_signature_mapping(abi):
 
 def remove_swarm_hash(bytecode):
     if isinstance(bytecode, str):
-        bytecode = re.sub(r"a165627a7a72305820\S{64}0029$", "", bytecode)
+        if bytecode.endswith("0029"):
+            bytecode = re.sub(r"a165627a7a72305820\S{64}0029$", "", bytecode)
+        if bytecode.endswith("0033"):
+            bytecode = re.sub(r"5056fe.*?0033$", "5056", bytecode)
     return bytecode
 
 def get_pcs_and_jumpis(bytecode):
@@ -192,7 +195,7 @@ def is_fixed(value):
 def split_len(seq, length):
     return [seq[i:i + length] for i in range(0, len(seq), length)]
 
-def print_individual_solution_as_transaction(logger, individual_solution, color="", function_signature_mapping={}):
+def print_individual_solution_as_transaction(logger, individual_solution, color="", function_signature_mapping={}, transaction_index=None):
     for index, input in enumerate(individual_solution):
         transaction = input["transaction"]
         if not transaction["to"] == None:
@@ -200,7 +203,7 @@ def print_individual_solution_as_transaction(logger, individual_solution, color=
                 hash = transaction["data"][0:10]
             else:
                 hash = transaction["data"][0:8]
-            if len(individual_solution) == 1:
+            if len(individual_solution) == 1 or (transaction_index != None and transaction_index == 0):
                 if hash in function_signature_mapping:
                     logger.title(color+"Transaction - " + function_signature_mapping[hash] + ":")
                 else:
@@ -223,6 +226,8 @@ def print_individual_solution_as_transaction(logger, individual_solution, color=
                     logger.title(color+"           " + str(data))
                 i += 1
             logger.title(color+"-----------------------------------------------------")
+            if transaction_index != None and index + 1 > transaction_index:
+                break
 
 def normalize_32_byte_hex_address(value):
     as_bytes = eth_utils.to_bytes(hexstr=value)

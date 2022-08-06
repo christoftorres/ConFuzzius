@@ -23,5 +23,5 @@ class UnprotectedSelfdestructDetector():
                         self.trusted_arguments += individual.solution[i]["transaction"]["data"]
             # An unprotected selfdestruct is detected if the sender of the transaction is an attacker and not trusted by a trusted account
             if individual.solution[transaction_index]["transaction"]["from"] in settings.ATTACKER_ACCOUNTS and not individual.solution[transaction_index]["transaction"]["from"].replace("0x", "") in self.trusted_arguments:
-                return current_instruction["pc"]
-        return None
+                return current_instruction["pc"], transaction_index
+        return None, None
